@@ -1,23 +1,15 @@
 from dataclasses import dataclass
 from typing import Iterable
 from sys import stdin
-from collections import defaultdict
 from math import prod
+
+from lib import Point, neighborhood
 
 
 def main() -> None:
     schematic = Schematic.from_string(stdin.read())
     print("Part 1", sum_of_part_numbers(schematic))
     print("Part 2", sum_of_gear_ratios(schematic))
-
-
-@dataclass(eq=True, frozen=True)
-class Point:
-    x: int
-    y: int
-
-    def __add__(self, rhs: "Point") -> "Point":
-        return Point(x=self.x + rhs.x, y=self.y + rhs.y)
 
 
 class GridDict(dict[Point, str]):
@@ -62,18 +54,8 @@ def find_symbols(grid: GridDict) -> Iterable[tuple[Point, str]]:
 
 def nearby_numbers(grid: GridDict, p: Point) -> Iterable[int]:
     used: set[Point] = set()
-    deltas: list[Point] = [
-        Point(-1, -1),
-        Point(0, -1),
-        Point(1, -1),
-        Point(-1, 0),
-        Point(1, 0),
-        Point(-1, 1),
-        Point(0, 1),
-        Point(1, 1),
-    ]
-    neighborhood: list[Point] = [p + d for d in deltas]
-    for q in neighborhood:
+
+    for q in neighborhood(p):
         if q in used or not grid[q].isdigit():
             continue
 
