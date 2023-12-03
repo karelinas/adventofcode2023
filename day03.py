@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, Tuple
+from typing import Iterable
 from sys import stdin
 from collections import defaultdict
 from math import prod
@@ -27,9 +27,8 @@ class GridDict(dict[Point, str]):
 
 @dataclass
 class Part:
-    number: int
+    numbers: list[int]
     symbol: str
-    p: Point
 
 
 @dataclass
@@ -44,14 +43,16 @@ class Schematic:
             for x, ch in enumerate(line.strip())
             if line and ch != "."
         )
-        parts: list[Part] = []
-        for p, symbol in find_symbols(grid):
-            parts.extend(Part(number, symbol, p) for number in nearby_numbers(grid, p))
 
-        return Schematic(parts=parts)
+        return Schematic(
+            parts=[
+                Part(numbers=list(nearby_numbers(grid, p)), symbol=symbol)
+                for p, symbol in find_symbols(grid)
+            ]
+        )
 
 
-def find_symbols(grid: GridDict) -> Iterable[Tuple[Point, str]]:
+def find_symbols(grid: GridDict) -> Iterable[tuple[Point, str]]:
     return (
         (p, symbol)
         for p, symbol in grid.items()
@@ -91,19 +92,12 @@ def nearby_numbers(grid: GridDict, p: Point) -> Iterable[int]:
         yield int("".join(digits))
 
 
-def sum_of_part_numbers(schematic: Schematic):
-    return sum(p.number for p in schematic.parts)
+def sum_of_part_numbers(schematic: Schematic) -> int:
+    return sum(sum(p.numbers) for p in schematic.parts)
 
 
-def sum_of_gear_ratios(schematic: Schematic):
-    gears = defaultdict(list)
-    for part in schematic.parts:
-        gears[part.p].append(part)
-    return sum(
-        prod(part.number for part in partlist)
-        for partlist in gears.values()
-        if len(partlist) == 2
-    )
+def sum_of_gear_ratios(schematic: Schematic) -> int:
+    return sum(prod(part.numbers) for part in schematic.parts if len(part.numbers) == 2)
 
 
 if __name__ == "__main__":
