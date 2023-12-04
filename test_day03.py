@@ -3,7 +3,7 @@ import unittest
 from day03 import Schematic, sum_of_part_numbers, sum_of_gear_ratios
 
 
-class Day02TestCase(unittest.TestCase):
+class Day03TestCase(unittest.TestCase):
     def test_example_data(self):
         example_data = (
             "467..114..\n"
