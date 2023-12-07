@@ -1,7 +1,7 @@
 from collections import Counter
 from dataclasses import dataclass
 from typing import Sequence
-from enum import IntEnum, auto
+from enum import IntEnum
 from sys import stdin
 
 
@@ -14,13 +14,13 @@ def main() -> None:
 
 
 class HandType(IntEnum):
-    HighCard: int = auto()
-    OnePair: int = auto()
-    TwoPair: int = auto()
-    ThreeOfAKind: int = auto()
-    FullHouse: int = auto()
-    FourOfAKind: int = auto()
-    FiveOfAKind: int = auto()
+    HighCard: int = 11111
+    OnePair: int = 1112
+    TwoPair: int = 122
+    ThreeOfAKind: int = 113
+    FullHouse: int = 23
+    FourOfAKind: int = 14
+    FiveOfAKind: int = 5
 
 
 @dataclass(eq=True, frozen=True)
@@ -60,27 +60,14 @@ class Hand:
     @property
     def type(self) -> HandType:
         counts = Counter(c.label for c in self.cards)
-        type_counts: int = len(counts.values())
+        return self._type_from_counts(list(counts.values()))
 
-        if type_counts == 1:
-            return HandType.FiveOfAKind
-        elif type_counts == 2:
-            # four of a kind
-            if 4 in counts.values():
-                return HandType.FourOfAKind
-            else:
-                return HandType.FullHouse
-        elif type_counts == 3:
-            if 3 in counts.values():
-                return HandType.ThreeOfAKind
-            else:
-                return HandType.TwoPair
-        elif type_counts == 4:
-            return HandType.OnePair
-        elif type_counts == 5:
-            return HandType.HighCard
-
-        assert None, "Never reached"
+    @staticmethod
+    def _type_from_counts(counts: list[int]) -> HandType:
+        type_number: int = sum(
+            v * 10**n for n, v in enumerate(reversed(sorted(counts)))
+        )
+        return HandType(type_number)
 
     def __lt__(self, rhs: "Hand") -> bool:
         t1: HandType = self.type
@@ -88,7 +75,7 @@ class Hand:
 
         # Better hand always wins
         if t1 != t2:
-            return t1 < t2
+            return t1 > t2
 
         # Equal hand is ranked by better card in earlier position
         for c1, c2 in zip(self.cards, rhs.cards):
@@ -109,30 +96,17 @@ class HandWithJokers(Hand):
     def type(self) -> HandType:
         """best possible hand taking jokers into account"""
         counts = Counter(c.label for c in self.cards)
-        type_counts: int = len(counts.values())
+
         joker_count: int = counts.get("J") if "J" in counts else 0  # type: ignore
 
-        if joker_count == 0:
-            # no jokers, fall back to regular comparison
-            return super().type
+        if joker_count != 0 and joker_count != 5:
+            # take the jokers out
+            del counts["J"]
+            # put the jokers back in as the best card
+            most_common_label = counts.most_common(1)[0][0]
+            counts[most_common_label] += joker_count
 
-        if type_counts == 1 or type_counts == 2:
-            return HandType.FiveOfAKind
-        elif type_counts == 3:
-            # four of a kind
-            if any(joker_count + c == 4 for t, c in counts.items() if t != "J"):
-                return HandType.FourOfAKind
-            else:
-                return HandType.FullHouse
-        elif type_counts == 4:
-            if any(joker_count + c == 3 for t, c in counts.items() if t != "J"):
-                return HandType.ThreeOfAKind
-            else:
-                return HandType.TwoPair
-        elif type_counts == 5:
-            return HandType.OnePair
-
-        assert None, "Never reached"
+        return self._type_from_counts(list(counts.values()))
 
     @staticmethod
     def from_string(data: str) -> "HandWithJokers":
