@@ -10,7 +10,15 @@ class Day01TestCase(unittest.TestCase):
         self.assertEqual(document.calibration_value(), 142)
 
     def test_calibration_value_example_part2(self):
-        example_input = "two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen\n"
+        example_input = (
+            "two1nine\n"
+            "eightwothree\n"
+            "abcone2threexyz\n"
+            "xtwone3four\n"
+            "4nineeightseven2\n"
+            "zoneight234\n"
+            "7pqrstsixteen\n"
+        )
         document = CorrectedCalibrationDocument.from_string(example_input)
         self.assertEqual(document.calibration_value(), 281)
 

@@ -1,7 +1,6 @@
 import unittest
 
 from day02 import (
-    GameRecord,
     CubeCounts,
     sum_of_possible_games,
     power_sum,
