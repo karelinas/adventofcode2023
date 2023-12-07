@@ -1,6 +1,6 @@
 import unittest
 
-from day07 import parse_hands, winnings
+from day07 import parse_hands, parse_hands_with_jokers, winnings
 
 
 class Day07TestCase(unittest.TestCase):
@@ -12,6 +12,9 @@ class Day07TestCase(unittest.TestCase):
         with self.subTest(msg="Part 1"):
             hands = parse_hands(example_data)
             self.assertEqual(winnings(hands), 6440)
+        with self.subTest(msg="Part 2"):
+            hands = parse_hands_with_jokers(example_data)
+            self.assertEqual(winnings(hands), 5905)
 
     def test_real_data(self):
         with open("inputs/day07.txt", "r") as f:
@@ -19,3 +22,6 @@ class Day07TestCase(unittest.TestCase):
             with self.subTest(msg="Part 1"):
                 hands = parse_hands(data)
                 self.assertEqual(winnings(hands), 251216224)
+            with self.subTest(msg="Part 2"):
+                hands = parse_hands_with_jokers(data)
+                self.assertEqual(winnings(hands), 250825971)
