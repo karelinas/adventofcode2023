@@ -104,8 +104,8 @@ def count_enclosed_tiles(grid: Grid) -> int:
     is_inner: bool = False
     inner_count: int = 0
 
-    max_x = max(p.x for p in grid.grid.keys())
-    max_y = max(p.y for p in grid.grid.keys())
+    max_x = max(p.x for p in loop_grid.keys())
+    max_y = max(p.y for p in loop_grid.keys())
     for y in range(max_y + 1):
         for x in range(max_x + 1):
             conns = loop_grid[Point(x, y)].connections
