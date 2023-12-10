@@ -17,6 +17,7 @@ PIPE_SYMBOLS: dict[str, list[Point]] = {
 def main() -> None:
     grid = Grid.from_string(stdin.read())
     print("Part 1:", loop_length(grid) // 2)
+    print("Part 2:", count_enclosed_tiles(grid))
 
 
 @dataclass(eq=True, frozen=True)
@@ -63,26 +64,25 @@ class Grid:
         return Grid(grid=new_grid, start=start)
 
 
-def shortest_route_to(
-    grid: GridDict, start: Point, end: Point, distances: dict[Point, int]
-) -> Optional[int]:
-    stack: list[Point] = [start]
-
-    while stack:
-        pos = stack.pop()
-        for c in grid[pos].connections:
-            if pos + c == end:
-                return distances[pos] + 1
-            if pos + c in distances:
-                continue
-            distances[pos + c] = distances[pos] + 1
-            stack.append(pos + c)
-
-    # Route not found
-    return None
-
-
 def loop_length(grid: Grid) -> int:
+    def shortest_route_to(
+        grid: GridDict, start: Point, end: Point, distances: dict[Point, int]
+    ) -> Optional[int]:
+        stack: list[Point] = [start]
+
+        while stack:
+            pos = stack.pop()
+            for c in grid[pos].connections:
+                if pos + c == end:
+                    return distances[pos] + 1
+                if pos + c in distances:
+                    continue
+                distances[pos + c] = distances[pos] + 1
+                stack.append(pos + c)
+
+        # Route not found
+        return None
+
     # check each possible route from starting point separately
     for route in grid.grid[grid.start].connections:
         distances: dict[Point, int] = {grid.start: 0, grid.start + route: 1}
@@ -105,6 +105,47 @@ def loop_length(grid: Grid) -> int:
         grid.grid[cur] = cur_tile
 
     assert None
+
+
+def count_enclosed_tiles(grid: Grid) -> int:
+    def cull_dead_ends(grid: Grid) -> GridDict:
+        stack: list[Point] = [grid.start]
+        visited: set[Point] = set()
+
+        while stack:
+            pos = stack[-1]
+
+            if pos in visited:
+                stack.pop()
+                continue
+
+            visited.add(pos)
+
+            for c in grid.grid[pos].connections:
+                if len(stack) > 1 and pos + c == grid.start:
+                    return GridDict({p: grid.grid[p] for p in stack})
+                if pos + c not in visited:
+                    stack.append(pos + c)
+                    break
+
+        assert None, "No loop found"
+
+    max_x = max(p.x for p in grid.grid.keys())
+    max_y = max(p.y for p in grid.grid.keys())
+    count = 0
+    is_inside: bool = False
+
+    loop_grid = cull_dead_ends(grid)
+
+    for y in range(max_y + 1):
+        for x in range(max_x + 1):
+            conns = loop_grid[Point(x, y)].connections
+            if not conns:
+                count += int(is_inside)
+            elif Point.north() in conns:
+                is_inside = not is_inside
+
+    return count
 
 
 if __name__ == "__main__":
