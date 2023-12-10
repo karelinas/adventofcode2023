@@ -22,14 +22,14 @@ def main() -> None:
 
 @dataclass(eq=True, frozen=True)
 class Tile:
-    connections: list[Point] = field(default_factory=list)
+    connections: set[Point] = field(default_factory=set)
 
     def with_connection(self, p: Point) -> "Tile":
-        return Tile(connections=self.connections + [p])
+        return Tile(connections=self.connections | set([p]))
 
     @staticmethod
     def from_string(data: str) -> "Tile":
-        return Tile(connections=PIPE_SYMBOLS[data] if data in PIPE_SYMBOLS else [])
+        return Tile(connections=set(PIPE_SYMBOLS[data] if data in PIPE_SYMBOLS else []))
 
 
 class GridDict(dict[Point, Tile]):
@@ -37,7 +37,7 @@ class GridDict(dict[Point, Tile]):
         return Tile()
 
 
-@dataclass(eq=True)
+@dataclass(eq=True, frozen=True)
 class Grid:
     grid: GridDict
     start: Point
