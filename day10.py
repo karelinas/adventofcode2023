@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Optional
 from sys import stdin
 
 from lib import Point, orthogonal_directions
@@ -64,88 +63,64 @@ class Grid:
         return Grid(grid=new_grid, start=start)
 
 
-def loop_length(grid: Grid) -> int:
-    def shortest_route_to(
-        grid: GridDict, start: Point, end: Point, distances: dict[Point, int]
-    ) -> Optional[int]:
-        stack: list[Point] = [start]
+def cull_dead_ends(grid: Grid) -> GridDict:
+    """remove dead end branches from the grid, leaving only the loop"""
+    stack: list[Point] = [grid.start]
+    visited: set[Point] = set()
 
-        while stack:
-            pos = stack.pop()
-            for c in grid[pos].connections:
-                if pos + c == end:
-                    return distances[pos] + 1
-                if pos + c in distances:
-                    continue
-                distances[pos + c] = distances[pos] + 1
+    while stack:
+        pos = stack[-1]
+
+        if pos in visited:
+            stack.pop()
+            continue
+
+        visited.add(pos)
+
+        for c in grid.grid[pos].connections:
+            # len(stack) > 2 avoids going immediately back to the start point from
+            # the first connection. This also breaks very short loops. Oh well.
+            if len(stack) > 2 and pos + c == grid.start:
+                return GridDict({p: grid.grid[p] for p in stack})
+            if pos + c not in visited:
                 stack.append(pos + c)
+                break
 
-        # Route not found
-        return None
+    assert None, "No loop found"
 
-    # check each possible route from starting point separately
-    for route in grid.grid[grid.start].connections:
-        distances: dict[Point, int] = {grid.start: 0, grid.start + route: 1}
-        cur: Point = grid.start + route
-        cur_tile = grid.grid[cur]
 
-        # replace the current tile with a version that has no link back to the start
-        grid.grid[cur] = Tile(
-            connections=[
-                conn for conn in cur_tile.connections if cur + conn != grid.start
-            ]
-        )
-        length: Optional[int] = shortest_route_to(
-            grid.grid, start=cur, end=grid.start, distances=distances
-        )
-        if length is not None:
-            return length
-
-        # restore the current tile
-        grid.grid[cur] = cur_tile
-
-    assert None
+def loop_length(grid: Grid) -> int:
+    new_grid = cull_dead_ends(grid)
+    return len(new_grid.keys())
 
 
 def count_enclosed_tiles(grid: Grid) -> int:
-    def cull_dead_ends(grid: Grid) -> GridDict:
-        stack: list[Point] = [grid.start]
-        visited: set[Point] = set()
+    # We can keep track of inside/outside the loop by tracking pipes that connect north.
+    # That is, when we're traversing the grid west-to-east and north-to-south, the
+    # first northward connection means that we've entered inside the loop; the second
+    # northward connection means we're now outside the loop, and so on. Keeping track
+    # of north-connecting pipes allows us to always know if we're inside or outside of
+    # the loop.
+    #
+    # This works only if we remove all pipes from the grid that are not part of the
+    # loop.
+    loop_grid = cull_dead_ends(grid)
 
-        while stack:
-            pos = stack[-1]
-
-            if pos in visited:
-                stack.pop()
-                continue
-
-            visited.add(pos)
-
-            for c in grid.grid[pos].connections:
-                if len(stack) > 1 and pos + c == grid.start:
-                    return GridDict({p: grid.grid[p] for p in stack})
-                if pos + c not in visited:
-                    stack.append(pos + c)
-                    break
-
-        assert None, "No loop found"
+    # is_inner keeps track of whether we're inside or outside of the loop
+    is_inner: bool = False
+    inner_count: int = 0
 
     max_x = max(p.x for p in grid.grid.keys())
     max_y = max(p.y for p in grid.grid.keys())
-    count = 0
-    is_inside: bool = False
-
-    loop_grid = cull_dead_ends(grid)
-
     for y in range(max_y + 1):
         for x in range(max_x + 1):
             conns = loop_grid[Point(x, y)].connections
             if not conns:
-                count += int(is_inside)
+                inner_count += int(is_inner)
             elif Point.north() in conns:
-                is_inside = not is_inside
+                is_inner = not is_inner
 
-    return count
+    return inner_count
 
 
 if __name__ == "__main__":

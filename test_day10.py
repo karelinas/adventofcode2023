@@ -3,7 +3,7 @@ import unittest
 from day10 import Grid, loop_length, count_enclosed_tiles
 
 
-class Day08TestCase(unittest.TestCase):
+class Day10TestCase(unittest.TestCase):
     def test_example_data_part1(self):
         example_data = "..F7.\n.FJ|.\nSJ.L7\n|F--J\nLJ...\n"
         grid = Grid.from_string(example_data)

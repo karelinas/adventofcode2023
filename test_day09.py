@@ -3,7 +3,7 @@ import unittest
 from day09 import parse_histories, sum_of_next_values, sum_of_previous_values
 
 
-class Day08TestCase(unittest.TestCase):
+class Day09TestCase(unittest.TestCase):
     def test_example_data(self):
         example_data = "0 3 6 9 12 15\n1 3 6 10 15 21\n10 13 16 21 30 45\n"
         histories = parse_histories(example_data)
