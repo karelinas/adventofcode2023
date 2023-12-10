@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Optional
 from sys import stdin
 
 from lib import Point, orthogonal_directions
@@ -63,34 +64,27 @@ class Grid:
         return Grid(grid=new_grid, start=start)
 
 
-def cull_dead_ends(grid: Grid) -> GridDict:
-    """remove dead end branches from the grid, leaving only the loop"""
-    stack: list[Point] = [grid.start]
+def cull_dead_pipes(grid: Grid) -> GridDict:
+    """remove unconnected pipes from the grid, leaving only the loop"""
     visited: set[Point] = set()
+    current: Optional[Point] = grid.start
 
-    while stack:
-        pos = stack[-1]
+    while current:
+        visited.add(current)
+        current = next(
+            (
+                current + conn
+                for conn in grid.grid[current].connections
+                if current + conn not in visited
+            ),
+            None,
+        )
 
-        if pos in visited:
-            stack.pop()
-            continue
-
-        visited.add(pos)
-
-        for c in grid.grid[pos].connections:
-            # len(stack) > 2 avoids going immediately back to the start point from
-            # the first connection. This also breaks very short loops. Oh well.
-            if len(stack) > 2 and pos + c == grid.start:
-                return GridDict({p: grid.grid[p] for p in stack})
-            if pos + c not in visited:
-                stack.append(pos + c)
-                break
-
-    assert None, "No loop found"
+    return GridDict({p: grid.grid[p] for p in visited})
 
 
 def loop_length(grid: Grid) -> int:
-    new_grid = cull_dead_ends(grid)
+    new_grid = cull_dead_pipes(grid)
     return len(new_grid.keys())
 
 
@@ -104,7 +98,7 @@ def count_enclosed_tiles(grid: Grid) -> int:
     #
     # This works only if we remove all pipes from the grid that are not part of the
     # loop.
-    loop_grid = cull_dead_ends(grid)
+    loop_grid = cull_dead_pipes(grid)
 
     # is_inner keeps track of whether we're inside or outside of the loop
     is_inner: bool = False
