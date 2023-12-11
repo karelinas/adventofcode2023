@@ -77,3 +77,7 @@ def orthogonal_directions() -> list[Point]:
 
 def orthogonal_neighborhood(p: Point) -> Iterator[Point]:
     return (p + d for d in orthogonal_directions())
+
+
+def manhattan_distance(p1: Point, p2: Point) -> int:
+    return abs(p1.x - p2.x) + abs(p1.y - p2.y)
