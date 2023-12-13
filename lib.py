@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Iterator
+from typing import Iterable, TypeVar
+
+T = TypeVar("T")
 
 
 @dataclass(eq=True, frozen=True)
@@ -62,7 +64,7 @@ def adjacent_directions() -> list[Point]:
     ]
 
 
-def neighborhood(p: Point) -> Iterator[Point]:
+def neighborhood(p: Point) -> Iterable[Point]:
     return (p + d for d in adjacent_directions())
 
 
@@ -75,9 +77,13 @@ def orthogonal_directions() -> list[Point]:
     ]
 
 
-def orthogonal_neighborhood(p: Point) -> Iterator[Point]:
+def orthogonal_neighborhood(p: Point) -> Iterable[Point]:
     return (p + d for d in orthogonal_directions())
 
 
 def manhattan_distance(p1: Point, p2: Point) -> int:
     return abs(p1.x - p2.x) + abs(p1.y - p2.y)
+
+
+def transpose(lst: Iterable[Iterable[T]]) -> list[tuple[T, ...]]:
+    return list(zip(*lst))
