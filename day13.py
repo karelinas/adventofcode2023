@@ -1,8 +1,10 @@
-from lib import transpose
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Iterable
+from functools import reduce
+from operator import or_
 from sys import stdin
+
+from lib import transpose
 
 
 def main() -> None:
@@ -17,10 +19,15 @@ class Grid:
 
     @staticmethod
     def from_string(data: str) -> "Grid":
+        def line_to_bits(line: str) -> int:
+            return reduce(
+                or_, (1 << shift if ch == "#" else 0 for shift, ch in enumerate(line))
+            )
+
         lines = data.split("\n")
         return Grid(
-            rows=[hash(line) for line in lines],
-            columns=[hash("".join(column)) for column in transpose(lines)],
+            rows=[line_to_bits(line) for line in lines],
+            columns=[line_to_bits("".join(column)) for column in transpose(lines)],
         )
 
 
@@ -44,26 +51,21 @@ def parse_grids(data: str) -> list[Grid]:
 
 
 def find_reflection(grid: Grid) -> ReflectionPoint:
-    def neighboring_identical_lines(lines: list[int]) -> Iterable[int]:
-        for idx, (a, b) in enumerate(zip(lines, lines[1:])):
-            if a == b:
-                yield idx
-
     def is_mirror_point(lines: list[int], idx: int) -> bool:
         return all(a == b for a, b in zip(reversed(lines[: idx + 1]), lines[idx + 1 :]))
 
-    for maybe_reflection in neighboring_identical_lines(grid.rows):
-        if is_mirror_point(grid.rows, maybe_reflection):
+    for idx in range(len(grid.rows) - 1):
+        if is_mirror_point(grid.rows, idx):
             return ReflectionPoint(
                 reflection_type=ReflectionType.Horizontal,
-                lines_before=maybe_reflection + 1,
+                lines_before=idx + 1,
             )
 
-    for maybe_reflection in neighboring_identical_lines(grid.columns):
-        if is_mirror_point(grid.columns, maybe_reflection):
+    for idx in range(len(grid.columns) - 1):
+        if is_mirror_point(grid.columns, idx):
             return ReflectionPoint(
                 reflection_type=ReflectionType.Vertical,
-                lines_before=maybe_reflection + 1,
+                lines_before=idx + 1,
             )
 
     assert None, "No reflection points found"
