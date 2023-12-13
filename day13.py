@@ -3,13 +3,15 @@ from enum import IntEnum
 from functools import reduce
 from operator import or_
 from sys import stdin
+from typing import Callable
 
 from lib import transpose
 
 
 def main() -> None:
     grids = parse_grids(stdin.read())
-    print("Part 1:", reflection_summary(grids))
+    print("Part 1:", apparent_reflection_summary(grids))
+    print("Part 2:", real_reflection_summary(grids))
 
 
 @dataclass
@@ -50,19 +52,34 @@ def parse_grids(data: str) -> list[Grid]:
     return [Grid.from_string(grid.strip()) for grid in data.split("\n\n") if grid]
 
 
-def find_reflection(grid: Grid) -> ReflectionPoint:
-    def is_mirror_point(lines: list[int], idx: int) -> bool:
-        return all(a == b for a, b in zip(reversed(lines[: idx + 1]), lines[idx + 1 :]))
+def is_apparent_mirror_point(lines: list[int], idx: int) -> bool:
+    return all(a == b for a, b in zip(reversed(lines[: idx + 1]), lines[idx + 1 :]))
 
+
+def is_real_mirror_point(lines: list[int], idx: int) -> bool:
+    difference: int = 0
+    for a, b in zip(reversed(lines[: idx + 1]), lines[idx + 1 :]):
+        difference += bin(a ^ b).count("1")
+        if difference > 1:
+            # short circuit
+            return False
+    return difference == 1
+
+
+def find_reflection(
+    grid: Grid, *, mirror_function: Callable[[list[int], int], bool]
+) -> ReflectionPoint:
+    # Check horizontal reflections
     for idx in range(len(grid.rows) - 1):
-        if is_mirror_point(grid.rows, idx):
+        if mirror_function(grid.rows, idx):
             return ReflectionPoint(
                 reflection_type=ReflectionType.Horizontal,
                 lines_before=idx + 1,
             )
 
+    # Check vertical reflections
     for idx in range(len(grid.columns) - 1):
-        if is_mirror_point(grid.columns, idx):
+        if mirror_function(grid.columns, idx):
             return ReflectionPoint(
                 reflection_type=ReflectionType.Vertical,
                 lines_before=idx + 1,
@@ -71,8 +88,20 @@ def find_reflection(grid: Grid) -> ReflectionPoint:
     assert None, "No reflection points found"
 
 
-def reflection_summary(grids: list[Grid]) -> int:
-    return sum(find_reflection(g).reflection_value for g in grids)
+def find_apparent_reflection(grid: Grid) -> ReflectionPoint:
+    return find_reflection(grid, mirror_function=is_apparent_mirror_point)
+
+
+def find_real_reflection(grid: Grid) -> ReflectionPoint:
+    return find_reflection(grid, mirror_function=is_real_mirror_point)
+
+
+def apparent_reflection_summary(grids: list[Grid]) -> int:
+    return sum(find_apparent_reflection(g).reflection_value for g in grids)
+
+
+def real_reflection_summary(grids: list[Grid]) -> int:
+    return sum(find_real_reflection(g).reflection_value for g in grids)
 
 
 if __name__ == "__main__":
