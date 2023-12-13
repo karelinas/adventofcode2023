@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import Iterable
-from sys import stdin
 from math import prod
+from sys import stdin
+from typing import Iterable
 
 from lib import Point, neighborhood
 

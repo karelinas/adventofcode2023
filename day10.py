@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Optional
 from sys import stdin
+from typing import Optional
 
 from lib import Point, orthogonal_directions
 

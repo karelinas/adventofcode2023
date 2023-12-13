@@ -1,6 +1,6 @@
 import unittest
 
-from day10 import Grid, loop_length, count_enclosed_tiles
+from day10 import Grid, count_enclosed_tiles, loop_length
 
 
 class Day10TestCase(unittest.TestCase):

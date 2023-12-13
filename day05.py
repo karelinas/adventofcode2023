@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Iterable
 from sys import stdin
+from typing import Iterable
 
 
 def main() -> None:

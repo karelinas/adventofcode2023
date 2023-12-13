@@ -1,6 +1,6 @@
 import unittest
 
-from day05 import lowest_location, Almanac
+from day05 import Almanac, lowest_location
 
 
 class Day05TestCase(unittest.TestCase):

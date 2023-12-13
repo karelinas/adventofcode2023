@@ -1,10 +1,9 @@
+import re
 from dataclasses import dataclass
 from itertools import cycle, takewhile
 from math import lcm
 from sys import stdin
 from typing import Iterable
-import re
-
 
 RE_EDGE = re.compile(r"^(\w{3}) = \((\w{3}), (\w{3})\)$")
 

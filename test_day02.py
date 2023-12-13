@@ -1,11 +1,6 @@
 import unittest
 
-from day02 import (
-    CubeCounts,
-    sum_of_possible_games,
-    power_sum,
-    games_from_string,
-)
+from day02 import CubeCounts, games_from_string, power_sum, sum_of_possible_games
 
 
 class Day02TestCase(unittest.TestCase):

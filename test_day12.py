@@ -1,11 +1,11 @@
 import unittest
 
 from day12 import (
+    SpringRow,
     count_arrangements,
+    parse_spring_rows,
     unfold_row,
     unfold_rows,
-    SpringRow,
-    parse_spring_rows,
 )
 
 

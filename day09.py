@@ -1,6 +1,5 @@
-from sys import stdin
 import re
-
+from sys import stdin
 
 RE_NUMBER = re.compile(r"-?\d+")
 

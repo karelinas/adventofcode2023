@@ -1,7 +1,7 @@
-from enum import IntEnum, auto
 from dataclasses import dataclass
-from sys import stdin
+from enum import IntEnum, auto
 from functools import cache
+from sys import stdin
 
 
 def main() -> None:

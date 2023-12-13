@@ -1,6 +1,6 @@
 import unittest
 
-from day11 import GridDict, sum_of_distances, expand_universe
+from day11 import GridDict, expand_universe, sum_of_distances
 
 
 class Day11TestCase(unittest.TestCase):

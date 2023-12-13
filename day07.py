@@ -1,8 +1,8 @@
 from collections import Counter
 from dataclasses import dataclass
-from typing import Sequence
 from enum import IntEnum
 from sys import stdin
+from typing import Sequence
 
 
 def main() -> None:

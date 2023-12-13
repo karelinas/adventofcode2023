@@ -1,8 +1,7 @@
-from dataclasses import dataclass
-from sys import stdin
-from math import prod, sqrt, ceil, floor
 import re
-
+from dataclasses import dataclass
+from math import ceil, floor, prod, sqrt
+from sys import stdin
 
 RE_NUMBER = re.compile(r"\d+")
 

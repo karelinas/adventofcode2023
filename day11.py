@@ -2,7 +2,6 @@ from dataclasses import asdict
 from itertools import combinations
 from sys import stdin
 
-
 from lib import Point, manhattan_distance
 
 

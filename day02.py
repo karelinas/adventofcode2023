@@ -1,8 +1,8 @@
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 from sys import stdin
 from typing import Optional
-import re
 
 RE_GAME = re.compile(r"Game (\d+): (.*)")
 RE_CUBE = re.compile(r"(\d+) (red|green|blue)")

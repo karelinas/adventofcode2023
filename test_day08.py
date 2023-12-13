@@ -1,6 +1,6 @@
 import unittest
 
-from day08 import Map, steps_between, ghost_steps
+from day08 import Map, ghost_steps, steps_between
 
 
 class Day08TestCase(unittest.TestCase):

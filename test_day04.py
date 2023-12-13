@@ -1,6 +1,6 @@
 import unittest
 
-from day04 import parse_cards, total_score, Card, count_scratch_cards
+from day04 import Card, count_scratch_cards, parse_cards, total_score
 
 
 class Day04TestCase(unittest.TestCase):

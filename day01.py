@@ -1,5 +1,5 @@
 from sys import stdin
-from typing import Iterable, NewType, TypeVar, Type
+from typing import Iterable, NewType, Type, TypeVar
 
 
 def main() -> None:
