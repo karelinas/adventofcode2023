@@ -15,6 +15,9 @@ class Point:
     def __sub__(self, rhs: "Point") -> "Point":
         return Point(x=self.x - rhs.x, y=self.y - rhs.y)
 
+    def __mul__(self, rhs: "Point") -> "Point":
+        return Point(x=self.x * rhs.x, y=self.y * rhs.y)
+
     def reverse(self) -> "Point":
         return Point(-self.x, -self.y)
 
