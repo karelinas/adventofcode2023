@@ -12,31 +12,20 @@ def main() -> None:
     print("Part 2:", most_energized_configuration(grid))
 
 
-class GridDict(dict[Point, str]):
-    def __missing__(self, key: Point) -> str:
-        return "."
-
-    @staticmethod
-    def from_string(data: str) -> "GridDict":
-        return GridDict(
-            {
-                Point(x, y): ch
-                for y, line in enumerate(data.split("\n"))
-                if line
-                for x, ch in enumerate(line)
-            }
-        )
-
-
 @dataclass(frozen=True)
 class Grid:
-    grid: GridDict
+    grid: dict[Point, str]
     width: int
     height: int
 
     @staticmethod
     def from_string(data: str) -> "Grid":
-        new_grid = GridDict.from_string(data)
+        new_grid = {
+            Point(x, y): ch
+            for y, line in enumerate(data.split("\n"))
+            if line
+            for x, ch in enumerate(line)
+        }
         max_x = max(p.x for p in new_grid.keys())
         max_y = max(p.y for p in new_grid.keys())
         return Grid(grid=new_grid, width=max_x + 1, height=max_y + 1)
