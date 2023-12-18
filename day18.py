@@ -1,9 +1,6 @@
 import re
 from dataclasses import dataclass
-from enum import IntEnum, auto
-from operator import attrgetter
 from sys import stdin
-from typing import Optional
 
 from lib import Point
 
@@ -62,52 +59,38 @@ def swap_instructions(instructions: list[DigInstruction]) -> list[DigInstruction
     return [inst.swap() for inst in instructions]
 
 
-class Tile(IntEnum):
-    Ground: int = auto()
-    Trench: int = auto()
-
-
-class GridDict(dict[Point, Tile]):
-    def __missing__(self, key: Point) -> Tile:
-        return Tile.Ground
-
-
-def dig_trench(trench: list[DigInstruction]) -> GridDict:
-    grid = GridDict()
-    pos = Point(0, 0)
+def make_polygon(trench: list[DigInstruction]) -> list[Point]:
+    points: list[Point] = [Point(0, 0)]
 
     for instr in trench:
-        for _ in range(instr.distance):
-            grid[pos] = Tile.Trench
-            pos += instr.direction
-    return grid
+        points.append(points[-1] + instr.direction * instr.distance)
+
+    return points
+
+
+def determinant(p1: Point, p2: Point) -> int:
+    # |x1 x2| = x1*y2 - x2*y1
+    # |y1 y2|
+    return p1.x * p2.y - p2.x * p1.y
 
 
 def lagoon_size(instructions: list[DigInstruction]) -> int:
-    trench = dig_trench(instructions)
+    vertices = make_polygon(instructions)
 
-    lagoon_size: int = 0
-    left_wall: Optional[Point] = None
+    # shoelace formula: https://en.wikipedia.org/wiki/Shoelace_formula
+    inner_area: float = (
+        sum(
+            determinant(p1, p2)
+            for p1, p2 in zip(vertices, vertices[1:] + [vertices[0]])
+        )
+        // 2
+    )
 
-    for p in sorted(trench.keys(), key=attrgetter("y", "x")):
-        current_tile: Tile = trench[p]
-        north_tile: Tile = trench[p + Point.north()]
+    # pick's theorem: https://en.wikipedia.org/wiki/Pick%27s_theorem
+    edge_points = sum(instr.distance for instr in instructions)
+    area: int = int(inner_area + edge_points // 2 + 1)
 
-        if north_tile != Tile.Trench or current_tile != Tile.Trench:
-            if current_tile == Tile.Trench and left_wall:
-                # we'll add the trenches back in later, so make sure
-                # we don't add them twice here
-                lagoon_size -= 1
-
-            continue
-
-        if left_wall:
-            lagoon_size += p.x - left_wall.x - 1
-            left_wall = None
-        else:
-            left_wall = p
-
-    return lagoon_size + len(trench.keys())
+    return area
 
 
 if __name__ == "__main__":

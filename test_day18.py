@@ -29,3 +29,15 @@ class Day18TestCase(unittest.TestCase):
         with self.subTest(msg="Part 2"):
             swapped_instructions = swap_instructions(dig_instructions)
             self.assertEqual(lagoon_size(swapped_instructions), 952408144115)
+
+    def test_real_data(self):
+        with open("inputs/day18.txt", "r") as f:
+            data = f.read()
+            dig_instructions = parse_instruction(data)
+
+            with self.subTest(msg="Part 1"):
+                self.assertEqual(lagoon_size(dig_instructions), 46334)
+
+            with self.subTest(msg="Part 2"):
+                swapped_instructions = swap_instructions(dig_instructions)
+                self.assertEqual(lagoon_size(swapped_instructions), 102000662718092)
