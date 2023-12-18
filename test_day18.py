@@ -1,6 +1,6 @@
 import unittest
 
-from day18 import lagoon_size, parse_instruction
+from day18 import lagoon_size, parse_instruction, swap_instructions
 
 
 class Day18TestCase(unittest.TestCase):
@@ -25,3 +25,7 @@ class Day18TestCase(unittest.TestCase):
 
         with self.subTest(msg="Part 1"):
             self.assertEqual(lagoon_size(dig_instructions), 62)
+
+        with self.subTest(msg="Part 2"):
+            swapped_instructions = swap_instructions(dig_instructions)
+            self.assertEqual(lagoon_size(swapped_instructions), 952408144115)
