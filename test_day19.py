@@ -1,6 +1,6 @@
 import unittest
 
-from day19 import accepted_rating, parse_input
+from day19 import accepted_rating, count_distinct_combinations, parse_input
 
 
 class Day19TestCase(unittest.TestCase):
@@ -29,6 +29,9 @@ class Day19TestCase(unittest.TestCase):
         with self.subTest(msg="Part 1"):
             self.assertEqual(accepted_rating(workflows, parts), 19114)
 
+        with self.subTest(msg="Part 2"):
+            self.assertEqual(count_distinct_combinations(workflows), 167409079868000)
+
     def test_real_data(self):
         with open("inputs/day19.txt", "r") as f:
             data = f.read()
@@ -36,3 +39,8 @@ class Day19TestCase(unittest.TestCase):
 
             with self.subTest(msg="Part 1"):
                 self.assertEqual(accepted_rating(workflows, parts), 287054)
+
+            with self.subTest(msg="Part 2"):
+                self.assertEqual(
+                    count_distinct_combinations(workflows), 131619440296497
+                )
