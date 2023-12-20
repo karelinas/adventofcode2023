@@ -13,32 +13,40 @@ RE_MODULE_DEFINITION = re.compile(r"^([%&]?\w+) -> (.*)$")
 
 
 def main() -> None:
-    data: str = stdin.read()
-
-    machinery = Machinery.from_string(data)
+    machinery = Machinery.from_string(stdin.read())
     machinery.button_mash(1000)
     print("Part 1:", machinery.pulse_score())
     print("Part 2:", fewest_pushes_for_rx_low(machinery))
 
 
 def fewest_pushes_for_rx_low(machinery: "Machinery") -> int:
+    machinery.reset()
+
+    # rx module should have only one conjunction module connected to it. We'll
+    # call it the "rm" module because that's what its name is in my data :-)
+    rm_module = next(m for m in machinery.modules.values() if "rx" in m.outputs)
+    assert isinstance(rm_module, ConjunctionModule)
+
+    # When all the inputs for the "rm" module are high, it sends a low pulse to rx
+    want_high_from = set(rm_module.memory.keys())
+    # Keep track of received high pulses
+    high_pulses: set[str] = set()
+
+    # Set a gnarly callback hack to let us know if rm received a high signal any time
+    # during button press processing. Note that viewing the memory after the button
+    # press is completed is not enough, as the states change multiple times during
+    # one turn, and the final state of the memory tends to be all low.
     def cb_received_pulse(pulse: Pulse, source: str) -> None:
         if pulse == Pulse.High:
             high_pulses.add(source)
 
-    machinery.reset()
-
-    # In my data, the conjunction module connected to rx is "rm", so just hardcode it
-    rm_module = machinery.modules["rm"]
-    assert isinstance(rm_module, ConjunctionModule)
-    want_high_from = set(rm_module.memory.keys())
-    high_pulses: set[str] = set()
-    # Set a gnarly hack to let us know if rm received a high signal any time during
-    # one button press processing. Not that viewing the memory after the button press
-    # is not enough, as the states change multiple times during one turn and the end
-    # state of the memory tends to be all low.
     rm_module.cb_received_pulse = cb_received_pulse
 
+    # Find the button press counts where each of the inputs of rm is set high. Then
+    # assume that the high pulse recurs at the same interval. Then take LCM of all
+    # the input cycles, which gives the final result. A lot of assumptions have to be
+    # met for this to work, but luckily the input seems to be crafted in such a way
+    # that it does work.
     result: int = 1
     for n in count(start=1):
         if not want_high_from:
@@ -56,16 +64,6 @@ class Pulse(IntEnum):
     Low: int = auto()
     High: int = auto()
 
-    def __str__(self) -> str:
-        if self == Pulse.Low:
-            return "low"
-        return "high"
-
-    def flip(self) -> "Pulse":
-        if self == Pulse.Low:
-            return Pulse.High
-        return Pulse.Low
-
 
 @dataclass
 class PulseMessage:
@@ -75,8 +73,8 @@ class PulseMessage:
 
 
 class FlipflopState(IntEnum):
-    On = auto()
     Off = auto()
+    On = auto()
 
     def flip(self) -> "FlipflopState":
         return FlipflopState.On if self == FlipflopState.Off else FlipflopState.Off
@@ -120,7 +118,7 @@ class FlipflopModule(Module):
             return []
 
         self.state = self.state.flip()
-        pulse_out: Pulse = Pulse.High if self.state == FlipflopState.On else Pulse.Low
+        pulse_out: Pulse = Pulse(self.state)
         return [
             PulseMessage(source=self.label, target=target, pulse=pulse_out)
             for target in self.outputs
