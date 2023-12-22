@@ -12,6 +12,7 @@ def main() -> None:
     bricks = parse_bricks(stdin.read())
     fallen_bricks = simulate_gravity(bricks)
     print("Part 1:", count_safe_to_disintegrate(fallen_bricks))
+    print("Part 2:", sum_of_best_chain_reactions(fallen_bricks))
 
 
 Point3D = namedtuple("Point3D", ["x", "y", "z"])
@@ -127,6 +128,32 @@ def count_safe_to_disintegrate(bricks: list[Brick]) -> int:
             disintegrate_count += 1
 
     return disintegrate_count
+
+
+def sum_of_best_chain_reactions(bricks: list[Brick]) -> int:
+    supports: dict[int, list[int]] = defaultdict(list)
+    for brick in bricks:
+        for supported_by in brick.supported_by:
+            supports[supported_by].append(brick.label)
+
+    bricks_by_label = {brick.label: brick for brick in bricks}
+
+    chain_reaction_count: int = 0
+    for brick in bricks:
+        fallen: set[int] = set([brick.label])
+        queue: list[int] = [brick.label]
+        while queue:
+            q = queue.pop(0)
+            for s in supports[q]:
+                if s in fallen:
+                    # don't disintegrate the same brick twice
+                    continue
+                if bricks_by_label[s].supported_by.issubset(fallen):
+                    queue.append(s)
+                    fallen.add(s)
+                    chain_reaction_count += 1
+
+    return chain_reaction_count
 
 
 if __name__ == "__main__":
